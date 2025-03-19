@@ -10,10 +10,11 @@ import time
 import csv
 
 SEARCH_TERM = "software engineer"
+SEARCH_LOCATION = "india"
 EMAIL = "EMAIL"
 PASSWORD = "PASSWORD"
 
-class TwitterScraper:
+class TrueUpScraper:
     def __init__(self):
         self.options = Options()
         # self.options.add_argument('--headless=new')
@@ -22,7 +23,7 @@ class TwitterScraper:
     def selenium_initialization(self, URL):
         self.driver = webdriver.Chrome(options=self.options)
         self.driver.get(URL)
-        # self.driver.maximize_window()
+        self.driver.maximize_window()
 
         self.selenium_log_in()
 
@@ -50,6 +51,27 @@ class TwitterScraper:
         self.continue_button.click()
 
         time.sleep(3)
+
+        self.selenium_search_location()
+
+    def selenium_search_location(self):
+        scroll_increment = 0
+        while scroll_increment < 200:
+            self.driver.execute_script(f"window.scrollTo(0, {scroll_increment * 10});")
+            time.sleep(0.5)
+            scroll_increment += 100
+
+        time.sleep(2)
+
+        self.search_location = WebDriverWait(self.driver, 5).until(
+            EC.element_to_be_clickable((By.XPATH,
+                                        '//*[@id="__next"]/main/main/div/div[2]/div/div/div/div/div/div/div/div/div[2]/div[1]/div/div/div[4]/div[3]/div[1]/div/div/div[2]/div/div/form/input'))
+        )
+        self.search_location.click()
+        self.search_location.send_keys(SEARCH_LOCATION)
+        self.search_location.send_keys(Keys.ENTER)
+
+        self.driver.execute_script("window.scrollTo(0, 0);")
 
         self.selenium_search_bar()
 
@@ -148,5 +170,5 @@ class TwitterScraper:
 if __name__ == "__main__":
     URL = "https://trueup.io/jobs"
 
-    scraper = TwitterScraper()
+    scraper = TrueUpScraper()
     scraper.selenium_initialization(URL)
